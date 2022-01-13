@@ -29,14 +29,14 @@ def logistic(gamma, y, c):
     return 1 / (1 + np.exp(-gamma * (y - c)))
 
 
-def indicator(y: np.array, c: int):
+def indicator(y: np.ndarray, c: int):
     """Indicator function."""
     return (y > c).astype(int)
 
 
-def exponential(gamma: float, y: np.array, c: int) -> np.array:
+def exponential(gamma: float, y: np.ndarray, c: int) -> np.ndarray:
     """Exponential function."""
-    return (1 - np.exp(-gamma * (y - c) ^ 2))
+    return (1 - np.exp(-gamma * (y - c)**2))
 
 
 TRANSITION_FUN = {'l': logistic, 'i': indicator, 'e': exponential}
@@ -61,8 +61,8 @@ class star():
         Args:
         lags_1:  Number of lags for regimen one
         lags_2:  Number of lags for regimen two
-        pi0:     A number betwen 0 and 1 that specify the lenght
-                 of the sample for computing the residuals
+        pi0:     Controls the number of candidates for the threshold value.
+                 (a value of 1 search in all values of y)
         type:    The type of the transicion function:
                     l, (logistic function),
                     i, (indicator function)
@@ -74,7 +74,7 @@ class star():
         self.type = type
         self.lag_max = max(lags_1, lags_2)
 
-    def design_matrix(self, X: np.array) -> tuple:
+    def design_matrix(self, X: np.ndarray) -> tuple:
         """Concatenate the matrix of lagged variables for both regimes."""
         intercept = np.ones((len(X), 1))
         lagged_vars = [np.roll(X, p) for p in range(self.lag_max)]
@@ -83,12 +83,12 @@ class star():
         X = self.scaler.fit_transform(X)
         return (X[:, 0], X[:, 1:])
 
-    def threshold_matrix(self, y: np.array) -> None
+    def threshold_matrix(self, y: np.ndarray) -> None:
         """Compute the matrix of possible lagged variables."""
         thres = [np.roll(y, p) for p in range(self.lag_max)]
         self.thres = np.concatenate(thres)[self.lag_max:, :]
 
-    def solution_indicator(self, X: np.array, y: np.array) -> tuple:
+    def ordinal_least_square(self, X: np.ndarray, y: np.ndarray) -> tuple:
         """Returns the solution optimal parameters given a threshold.
 
         Args:
@@ -103,10 +103,10 @@ class star():
         params = np.matmul(np.matmul(XX_inv, np.transpose(X)), y)
 
         residuals = y - np.matmul(X, params)
-        sigma = np.matmul(np.transpose(residuals), residuals))
+        sigma = np.matmul(np.transpose(residuals), residuals)
         return (params, sigma)
 
-    def sequential_least_square(self, X: np.array, y: np.array) -> tuple:
+    def sequential_least_square(self, X: np.ndarray, y: np.ndarray) -> dict:
         """Find the values for c and the delay parameter.
 
         Use a greedy approach, to search for all posible values of C and all
@@ -114,17 +114,28 @@ class star():
 
         Args:
         X: Design matrix
-        y: Vector with dependant variables
+        y: Vect or with dependant variables
 
         Returns:
         Tuple containing the parameters and sigma^2
         """
-        posible_c=np.sort(thres[:, 0], kind = "quicksort")
 
-        for i in range(self.lag_max):
+        threshold = np.sort(self.thres[:, 1:], kind="mergesort")
+        X1, X2 = (X[:, :self.lags_1], X[:, :self.lags_2])
+        min_sigma = np.inf
+        res = {}
+        for lag_d in range(self.lag_max):
+            for c in threshold:
+                g = indicator(self.thres[:, lag_d + 1], c)
+                X_all = np.concatenate([X1*g, X2*(1-g)], axis=1)
+                params, metric = self.ordinal_least_square(X_all, y)
+                if metric < min_sigma:
+                    min_sigma = metric
+                    res['params'] = params
+                    res['metric'] = metric
+        return res
 
-
-    def fit(self, X: np.array) -> None:
+    def fit(self, X: np.ndarray, method: str = 'l') -> None:
         """Fit the model.
 
         The optimization process used is sequencial least squares for the
@@ -132,6 +143,10 @@ class star():
         {gamma,d,c,phi_1,phi_2} that minimizing the sum of square residuals.
 
         Args:
-        X: Numpy array of shape (N, 1) where N is the number of samples
+        X:      Numpy array of shape (N, 1) where N is the number of samples
+        method: A string, one of 'i': indicator function, 'l' logistic function
+                'e' exponential function
         """
-        X=self.design_matrix(X)
+        y, X = self.design_matrix(X)
+        if method == 'i':
+            params, metric = self.sequential_least_square(X, y)
