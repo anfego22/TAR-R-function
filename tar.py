@@ -34,6 +34,22 @@ def logistic(gamma, y, c):
     return 1 / (1 + np.exp(-gamma * (y - c)))
 
 
+def syntetic_data():
+    """Create data with a specify dynamics.
+
+    Syntetic data is created with parameters
+    phi_1 = [0.4], phi_2 = [0.2, 0.3]
+    """
+    d = 3
+    x = [0]*100
+    for t in range(99):
+        if x[t-d] > 0.5:
+            x[t+1] = 0.4 * x[t] + np.random.randn(1)[0]
+        else:
+            x[t+1] = 0.2 * x[t] + 0.3 * x[t-1] + np.random.randn(1)[0]
+    return x
+
+
 class star():
     """Calculate the Self Existing Threshold Autoregresive Model.
 
@@ -119,7 +135,7 @@ class star():
         res = {}
         for lag_d in range(self.lag_max):
             for c in threshold:
-                g = indicator(X[:, lag_d + 1], c)
+                g = indicator(X[:, lag_d + 1], c).reshape(-1, 1)
                 X_all = np.concatenate([X1*g, X2*(1-g)], axis=1)
                 params, metric = self.ordinal_least_square(X_all, y)
                 if metric < min_sigma:
