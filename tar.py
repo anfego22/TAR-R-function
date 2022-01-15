@@ -65,20 +65,21 @@ class star():
         self.pi0 = pi0
         self.type = type
         self.lag_max = max(lags_1, lags_2)
-
-    def design_matrix(self, X: np.ndarray) -> tuple:
-        """Concatenate the matrix of lagged variables for both regimes."""
-        intercept = np.ones((len(X), 1))
-        lagged_vars = [np.roll(X, p) for p in range(self.lag_max)]
-        X = np.concatenate([intercept] + lagged_vars, axis=1)[self.lag_max:, :]
         self.scaler = StandardScaler()
-        X = self.scaler.fit_transform(X)
-        return (X[:, 0], X[:, 1:])
 
-    def threshold_matrix(self, y: np.ndarray) -> None:
+    def design_matrix(self, y: np.ndarray) -> tuple:
+        """Concatenate the matrix of lagged variables for both regimes."""
+        X = self.threshold_matrix(y)
+        intercept = np.ones((X.shape[0], 1))
+        #X = self.scaler.fit_transform(X)
+        y = X[:, 0]
+        X = np.concatenate([intercept, X[:, 1:]], axis=1)
+        return (y, X)
+
+    def threshold_matrix(self, y: np.ndarray) -> np.ndarray:
         """Compute the matrix of possible lagged variables."""
         thres = np.array([np.roll(y, p) for p in range(self.lag_max + 1)]).transpose()
-        self.thres = thres[self.lag_max:, :]
+        return thres[self.lag_max:, :]
 
     def ordinal_least_square(self, X: np.ndarray, y: np.ndarray) -> tuple:
         """Returns the solution optimal parameters given a threshold.
@@ -112,13 +113,13 @@ class star():
         Tuple containing the parameters and sigma^2
         """
 
-        threshold = np.sort(self.thres[:, 1:], kind="mergesort")
-        X1, X2 = (X[:, :self.lags_1], X[:, :self.lags_2])
+        threshold = np.sort(X[:, 1], kind="mergesort")
+        X1, X2 = (X[:, :(self.lags_1+1)], X[:, :(self.lags_2+1)])
         min_sigma = np.inf
         res = {}
         for lag_d in range(self.lag_max):
             for c in threshold:
-                g = indicator(self.thres[:, lag_d + 1], c)
+                g = indicator(X[:, lag_d + 1], c)
                 X_all = np.concatenate([X1*g, X2*(1-g)], axis=1)
                 params, metric = self.ordinal_least_square(X_all, y)
                 if metric < min_sigma:
@@ -129,7 +130,7 @@ class star():
                     res['c'] = c
         return res
 
-    def fit(self, X: np.ndarray, method: str = 'l') -> None:
+    def fit(self, X: np.ndarray) -> None:
         """Fit the model.
 
         The optimization process used is sequencial least squares for the
@@ -142,5 +143,5 @@ class star():
                 'e' exponential function
         """
         y, X = self.design_matrix(X)
-        if method == 'i':
-            res = self.sequential_least_square(X, y)
+        self.params = self.sequential_least_square(X, y)
+        return None
