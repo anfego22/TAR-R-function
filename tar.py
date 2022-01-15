@@ -24,22 +24,14 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 
-def logistic(gamma, y, c):
-    """Logistic function."""
-    return 1 / (1 + np.exp(-gamma * (y - c)))
-
-
-def indicator(y: np.ndarray, c: int):
-    """Indicator function."""
+def indicator(y: np.ndarray, c: float) -> np.ndarray:
+    """Indicator function, 1 i y_i > c."""
     return (y > c).astype(int)
 
 
-def exponential(gamma: float, y: np.ndarray, c: int) -> np.ndarray:
-    """Exponential function."""
-    return (1 - np.exp(-gamma * (y - c)**2))
-
-
-TRANSITION_FUN = {'l': logistic, 'i': indicator, 'e': exponential}
+def logistic(gamma, y, c):
+    """Logistic function."""
+    return 1 / (1 + np.exp(-gamma * (y - c)))
 
 
 class star():
@@ -85,8 +77,8 @@ class star():
 
     def threshold_matrix(self, y: np.ndarray) -> None:
         """Compute the matrix of possible lagged variables."""
-        thres = [np.roll(y, p) for p in range(self.lag_max)]
-        self.thres = np.concatenate(thres)[self.lag_max:, :]
+        thres = np.array([np.roll(y, p) for p in range(self.lag_max + 1)]).transpose()
+        self.thres = thres[self.lag_max:, :]
 
     def ordinal_least_square(self, X: np.ndarray, y: np.ndarray) -> tuple:
         """Returns the solution optimal parameters given a threshold.
@@ -133,6 +125,8 @@ class star():
                     min_sigma = metric
                     res['params'] = params
                     res['metric'] = metric
+                    res['d'] = lag_d
+                    res['c'] = c
         return res
 
     def fit(self, X: np.ndarray, method: str = 'l') -> None:
@@ -149,4 +143,4 @@ class star():
         """
         y, X = self.design_matrix(X)
         if method == 'i':
-            params, metric = self.sequential_least_square(X, y)
+            res = self.sequential_least_square(X, y)

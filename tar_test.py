@@ -18,17 +18,29 @@ def test_indicator() -> None:
     return
 
 
-def test_logistic() -> None:
-    """Test logistic function."""
-    y = np.array([
-        0.26256947, 1.39972713, -1.11509627, -0.21995397, 0.0564498,
-        -1.0148332, 0.24226806, -0.42289193, 1.29083007, -0.44132848
-    ])
+def test_threshold_matrix() -> None:
+    """Test for threshold matrix."""
+    lag_1 = 1
+    lag_2 = 2
+    pi0 = 0.5
+    y = np.array([0.26256947, 1.39972713, -1.11509627, -0.21995397, 0.0564498])
+    """
+    x_t    = 0.26256947, 1.39972713,-1.11509627, -0.21995397, 0.0564498
+    x_{t-1}=      0    , 0.26256947, 1.39972713, -1.11509627,-0.21995397, 
+    x_{t-2}=      0    ,     0     , 0.26256947, 1.39972713, -1.11509627
 
-    res = tar.logistic(1, y, -4.05)
-    expected = np.array([
-        0.02215191, 0.06597219, 0.00568007, 0.01378961, 0.01810049, 0.00627534,
-        0.0217164, 0.01128544, 0.05957085, 0.01108157
-    ])
-
-    return 1 / (1 + exp(-gamma * (y - c)))
+    """
+    expected_out = np.array([
+        [-1.11509627, -0.21995397, 0.0564498],
+        [1.39972713, -1.11509627, -0.21995397],
+        [0.26256947, 1.39972713, -1.11509627]
+    ]).transpose()
+    # The expe
+    tarObj = tar.star(lag_1, lag_2, pi0)
+    tarObj.threshold_matrix(y)
+    if not np.all(np.equal(tarObj.thres, expected_out)):
+        print(f"Error, se esperaba {expected_out} pero el resultado fue {tarObj.thres}")
+        raise
+    else:
+        print("Test pass!")
+    return
