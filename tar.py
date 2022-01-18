@@ -34,20 +34,22 @@ def logistic(gamma, y, c):
     return 1 / (1 + np.exp(-gamma * (y - c)))
 
 
-def syntetic_data():
+def syntetic_data() -> np.ndarray:
     """Create data with a specify dynamics.
 
     Syntetic data is created with parameters
-    phi_1 = [0.4], phi_2 = [0.2, 0.3]
+    phi_1 = [.7, 0.4], phi_2 = [.2, 0.2, 0.3]
+    d = 2 and c = .5
     """
-    d = 3
-    x = [0]*100
-    for t in range(99):
+    T = 10000
+    d = 2
+    x = [0]*T
+    for t in range(1, T-1):
         if x[t-d] > 0.5:
-            x[t+1] = 0.4 * x[t] + np.random.randn(1)[0]
+            x[t+1] = 0.7 + 0.4 * x[t] + np.random.randn(1)[0]
         else:
-            x[t+1] = 0.2 * x[t] + 0.3 * x[t-1] + np.random.randn(1)[0]
-    return x
+            x[t+1] = .2 + 0.2 * x[t] + 0.3 * x[t-1] + np.random.randn(1)[0]
+    return np.array(x)
 
 
 class star():
@@ -76,9 +78,10 @@ class star():
                     i, (indicator function)
                     e, (exponencial function)
         """
-        self.lags_1 = lags_1
-        self.lags_2 = lags_2
+        self.lag_1 = lags_1
+        self.lag_2 = lags_2
         self.pi0 = pi0
+        self.delta = 0
         self.type = type
         self.lag_max = max(lags_1, lags_2)
         self.scaler = StandardScaler()
@@ -108,9 +111,12 @@ class star():
         Tuple containing the parameters and sigma^2
         """
         XX = np.matmul(np.transpose(X), X)
-        XX_inv = np.linalg.inv(XX)
-        params = np.matmul(np.matmul(XX_inv, np.transpose(X)), y)
-
+        regul = np.zeros(XX.shape)
+        # Add regularization to the diagonal
+        np.fill_diagonal(regul, self.delta)
+        #XX_inv = np.linalg.inv(XX + regul)
+        #params = np.matmul(np.matmul(XX_inv, np.transpose(X)), y)
+        params = np.linalg.lstsq(X, y, rcond=None)[0]
         residuals = y - np.matmul(X, params)
         sigma = np.matmul(np.transpose(residuals), residuals)
         return (params, sigma)
@@ -130,7 +136,7 @@ class star():
         """
 
         threshold = np.sort(X[:, 1], kind="mergesort")
-        X1, X2 = (X[:, :(self.lags_1+1)], X[:, :(self.lags_2+1)])
+        X1, X2 = (X[:, :(self.lag_1+1)], X[:, :(self.lag_2+1)])
         min_sigma = np.inf
         res = {}
         for lag_d in range(self.lag_max):
@@ -161,3 +167,9 @@ class star():
         y, X = self.design_matrix(X)
         self.params = self.sequential_least_square(X, y)
         return None
+
+
+y = syntetic_data()
+objTar = star(1, 2, .5, type='i')
+objTar.fit(y)
+print(objTar.params)
