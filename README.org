@@ -14,11 +14,16 @@ A special case is when $x_{t-d} = y_{t-d}$, in other words when the transition i
    SOLS is just computing OLS for all posible values of c and d and find the c, and d that minimize the
    sum of square errors.
 
-** TODO complete sequential_least_square function.
-   DEADLINE: <2022-01-14 Fri>
-** TODO create test for the threshold_matrix
-   DEADLINE: <2022-01-13 Thu>
-** TODO create test for the logistic function
-   DEADLINE: <2022-01-14 Fri>
+** DONE complete sequential_least_square function.
+   CLOSED: [2022-01-13 Thu 21:47] DEADLINE: <2022-01-16 Sun>
+** DONE create test for the threshold_matrix
+   CLOSED: [2022-01-15 Sat 01:41] DEADLINE: <2022-01-16 Sun>
+** DONE create test for the design matrix
+   CLOSED: [2022-01-15 Sat 02:42] DEADLINE: <2022-01-14 Fri>
+** TODO Debug de fit function (learn the debugging tool)
+DEADLINE: <2022-01-15 Sat>
 
 
+
+
+   
