@@ -34,24 +34,6 @@ def logistic(gamma, y, c):
     return 1 / (1 + np.exp(-gamma * (y - c)))
 
 
-def syntetic_data() -> np.ndarray:
-    """Create data with a specify dynamics.
-
-    Syntetic data is created with parameters
-    phi_1 = [.7, 0.4], phi_2 = [.2, 0.2, 0.3]
-    d = 2 and c = .5
-    """
-    T = 10000
-    d = 2
-    x = [0]*T
-    for t in range(1, T-1):
-        if x[t-d] > 0.5:
-            x[t+1] = 0.7 + 0.4 * x[t] + np.random.randn(1)[0]
-        else:
-            x[t+1] = .2 + 0.2 * x[t] + 0.3 * x[t-1] + np.random.randn(1)[0]
-    return np.array(x)
-
-
 class star():
     """Calculate the Self Existing Threshold Autoregresive Model.
 
@@ -167,9 +149,3 @@ class star():
         y, X = self.design_matrix(X)
         self.params = self.sequential_least_square(X, y)
         return None
-
-
-y = syntetic_data()
-objTar = star(1, 2, .5, type='i')
-objTar.fit(y)
-print(objTar.params)
