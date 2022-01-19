@@ -27,6 +27,17 @@ Unfortunatly the estimation of this data syntetic data produce the results:
 + phi_1 = [.66, .4]
 + phi_2 = [.43, .31, .21]
 
+* Results with tsay data.
+In Tsay:
+@book{tsay2005analysis,
+  title={Analysis of financial time series},
+  author={Tsay, Ruey S},
+  volume={543},
+  year={2005},
+  publisher={John wiley \& sons}
+} page 180 there is an example with the U.S monthly civilian unemployment rate, they employ the TAR
+model using the first difference of the series
+
 * Task completed
 ** DONE complete sequential_least_square function.
    CLOSED: [2022-01-13 Thu 21:47] DEADLINE: <2022-01-16 Sun>

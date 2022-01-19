@@ -28,7 +28,7 @@ def test_threshold_matrix() -> None:
     y = np.array([0.26256947, 1.39972713, -1.11509627, -0.21995397, 0.0564498])
     """
     x_t    = 0.26256947, 1.39972713,-1.11509627, -0.21995397, 0.0564498
-    x_{t-1}=      0    , 0.26256947, 1.39972713, -1.11509627,-0.21995397, 
+    x_{t-1}=      0    , 0.26256947, 1.39972713, -1.11509627,-0.21995397,
     x_{t-2}=      0    ,     0     , 0.26256947, 1.39972713, -1.11509627
 
     """
@@ -73,3 +73,36 @@ def test_design_matrix() -> None:
     else:
         print("Independent variable test fail!")
         raise
+
+
+def syntetic_data(d: int = 2, c: float = .5, T: int = 10000) -> np.ndarray:
+    """Create data with a specify dynamics.
+
+    Syntetic data is created with parameters
+    phi_1 = [.7, 0.4], phi_2 = [.2, 0.2, 0.3]
+    d = 2 and c = .5
+    """
+    x = [0]*T
+    for t in range(1, T-1):
+        if x[t-d] > c:
+            x[t+1] = 0.7 + 0.4 * x[t] + np.random.randn(1)[0]
+        else:
+            x[t+1] = .2 + 0.2 * x[t] + 0.3 * x[t-1] + np.random.randn(1)[0]
+    return np.array(x)
+
+
+def test_tar_syntetic():
+    y = syntetic_data()
+    objTar = star(1, 2, .5, type='i')
+    objTar.fit(y)
+    coeff_expected = [.7, .4, .2, .2, .3]
+    c_expected = .5
+    d_expected = 2
+    coeff_result = objTar.params['params']
+    print(f"Expected coefficients are {coeff_expected} and the result was {coeff_result}\n")
+    print(f"Expected threshold is {c_expected} and the result was {coeff_result}\n")
+    print(f"Expected lag is {d_expected} and the result was {coeff_result}\n")
+    return None
+
+
+def tar_test_unemploy():
