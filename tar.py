@@ -47,40 +47,43 @@ class star():
     which result in the LSTAR or ESTAR model.
     """
 
-    def __init__(self, lags_1: int, lags_2: int, pi0: float, type: str = 'l') -> None:
+    def __init__(self, lags: list, intercept: list = [true, true],
+                 pi0: float, type: str = 'l') -> None:
         """Class initizizer.
 
-        Args:
-        lags_1:  Number of lags for regimen one
-        lags_2:  Number of lags for regimen two
-        pi0:     Controls the number of candidates for the threshold value.
-                 (a value of 1 search in all values of y)
-        type:    The type of the transicion function:
-                    l, (logistic function),
-                    i, (indicator function)
-                    e, (exponencial function)
+        Args:  
+        lags:       A list of tuples with the lags of each regime ex: [(1, 2, 3), (1, 2)]
+        intercept: A list of bools that indicate whether to fit an intercept in that regime.
+        pi0:       Controls the number of candidates for the threshold value.
+                   (a value of 1 search in all values of y)
+        type:      The type of the transicion function:
+                   i, (indicator function)
         """
-        self.lag_1 = lags_1
-        self.lag_2 = lags_2
+        self.lag_1 = lags[0]
+        self.lag_2 = lags[1]
+        self.fit_intercept = intercept
         self.pi0 = pi0
         self.delta = 0
         self.type = type
-        self.lag_max = max(lags_1, lags_2)
+        self.lag_max = max([max(lags[0]), max(lags[1])])
         self.scaler = StandardScaler()
 
     def design_matrix(self, y: np.ndarray) -> tuple:
         """Concatenate the matrix of lagged variables for both regimes."""
-        X = self.threshold_matrix(y)
+        self.threshold_matrix(y)
+        X = np.copy(self.lagged_matrix)
+        X = [X[:, self.lags_1], X[:, self.lags_2]]
         intercept = np.ones((X.shape[0], 1))
-        #X = self.scaler.fit_transform(X)
-        y = X[:, 0]
-        X = np.concatenate([intercept, X[:, 1:]], axis=1)
+        y = X[0][:, 0]
+        for i, with_intercept in enumerate(self.intercept):
+            if with_intercept:
+                X[i] = np.concatenate([intercept, X], axis=1)
         return (y, X)
 
-    def threshold_matrix(self, y: np.ndarray) -> np.ndarray:
+    def threshold_matrix(self, y: np.ndarray) -> None:
         """Compute the matrix of possible lagged variables."""
         thres = np.array([np.roll(y, p) for p in range(self.lag_max + 1)]).transpose()
-        return thres[self.lag_max:, :]
+        self.lagged_matrix = thres[self.lag_max:, :]
 
     def ordinal_least_square(self, X: np.ndarray, y: np.ndarray) -> tuple:
         """Returns the solution optimal parameters given a threshold.
@@ -93,38 +96,33 @@ class star():
         Tuple containing the parameters and sigma^2
         """
         XX = np.matmul(np.transpose(X), X)
-        regul = np.zeros(XX.shape)
+        #regul = np.zeros(XX.shape)
         # Add regularization to the diagonal
-        np.fill_diagonal(regul, self.delta)
-        #XX_inv = np.linalg.inv(XX + regul)
-        #params = np.matmul(np.matmul(XX_inv, np.transpose(X)), y)
+        #np.fill_diagonal(regul, self.delta)
         params = np.linalg.lstsq(X, y, rcond=None)[0]
         residuals = y - np.matmul(X, params)
         sigma = np.matmul(np.transpose(residuals), residuals)
         return (params, sigma)
 
-    def sequential_least_square(self, X: np.ndarray, y: np.ndarray) -> dict:
+    def sequential_least_square(self, X: list, y: np.ndarray) -> dict:
         """Find the values for c and the delay parameter.
 
         Use a greedy approach, to search for all posible values of C and all
         posible values of d.
 
         Args:
-        X: Design matrix
+        X: Design matrix a list of with two np.ndarray, the result from design_matrix
         y: Vect or with dependant variables
 
         Returns:
         Tuple containing the parameters and sigma^2
         """
-
-        threshold = np.sort(X[:, 1], kind="mergesort")
-        X1, X2 = (X[:, :(self.lag_1+1)], X[:, :(self.lag_2+1)])
         min_sigma = np.inf
         res = {}
         for lag_d in range(self.lag_max):
-            for c in threshold:
-                g = indicator(X[:, lag_d + 1], c).reshape(-1, 1)
-                X_all = np.concatenate([X1*g, X2*(1-g)], axis=1)
+            for c in self.thre_sorted:
+                g = indicator(self.lagged_matrix[:, lag_d], c).reshape(-1, 1)
+                X_all = np.concatenate([X[0]*g, X[1]*(1-g)], axis=1)
                 params, metric = self.ordinal_least_square(X_all, y)
                 if metric < min_sigma:
                     min_sigma = metric
@@ -147,5 +145,6 @@ class star():
                 'e' exponential function
         """
         y, X = self.design_matrix(X)
+        self.thre_sorted = np.sort(y, kind="mergesort")
         self.params = self.sequential_least_square(X, y)
         return None
