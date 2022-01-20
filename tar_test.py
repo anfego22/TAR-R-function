@@ -11,26 +11,23 @@ def test_indicator() -> None:
     ])
     res = tar.indicator(y, .5)
     expected = np.array([0, 1, 0, 0, 0, 0, 0, 0, 1, 0])
-
     if not np.all(np.equal(res, expected)):
         print(f"Error, se esperaba {expected} pero la funcion arrojo {res}")
         raise
     else:
-        print("Test pass!")
+        print("Indicator test 1 pass!")
     return
 
 
 def test_threshold_matrix() -> None:
     """Test for threshold matrix."""
-    lag_1 = 1
-    lag_2 = 2
+    lags = [[1], [1, 2]]
     pi0 = 0.5
     y = np.array([0.26256947, 1.39972713, -1.11509627, -0.21995397, 0.0564498])
     """
     x_t    = 0.26256947, 1.39972713,-1.11509627, -0.21995397, 0.0564498
     x_{t-1}=      0    , 0.26256947, 1.39972713, -1.11509627,-0.21995397,
     x_{t-2}=      0    ,     0     , 0.26256947, 1.39972713, -1.11509627
-
     """
     expected_out = np.array([
         [-1.11509627, -0.21995397, 0.0564498],
@@ -38,40 +35,53 @@ def test_threshold_matrix() -> None:
         [0.26256947, 1.39972713, -1.11509627]
     ]).transpose()
     # The expe
-    tarObj = tar.star(lag_1, lag_2, pi0)
-    thres = tarObj.threshold_matrix(y)
-    if not np.all(np.equal(thres, expected_out)):
+    tarObj = tar.star(lags)
+    tarObj.threshold_matrix(y)
+    if not np.all(np.equal(tarObj.lagged_matrix, expected_out)):
         print(f"Error, se esperaba {expected_out} pero el resultado fue {thres}")
+        print("Error, threshold_matrix test 1 failed")
         raise
     else:
-        print("Test pass!")
+        print("Success, threshold_matrix test 1 pass")
     return
 
 
 def test_design_matrix() -> None:
     """Test the design matrix."""
-    lag_1 = 1
-    lag_2 = 2
-    pi0 = 0.5
+    lags = [[2], [1, 3]]
     y = np.array([1, 2, 3, 4, 5, 6])
-    X_expected = np.array([
-        [1, 1, 1, 1],
-        [2, 3, 4, 5],
-        [1, 2, 3, 4],
+    X1_expected = np.array([
+        [1, 1, 1],
+        [2, 3, 4]
     ]).transpose()
-    y_expect = np.array([3, 4, 5, 6])
-    tarObj = tar.star(lag_1, lag_2, pi0)
+    X2_expected = np.array([
+        [1, 1, 1],
+        [3, 4, 5],
+        [1, 2, 3]
+    ]).transpose()
+    y_expect = np.array([4, 5, 6])
+    tarObj = tar.star(lags)
     y, X = tarObj.design_matrix(y)
     if np.all(np.equal(y, y_expect)):
         print("Dependent variable test pass!")
     else:
         print("Dependent variable test fail!")
         raise
-    if np.all(np.equal(X, X_expected)):
-        print("Independent variable test pass!")
+    if np.all(np.equal(X[0], X1_expected)):
+        print("First regime test 1 pass, design_matrix")
         return
     else:
-        print("Independent variable test fail!")
+        print("First regime test 1 failed, design_matrix")
+        print(X[0])
+        print(X1_expected)
+        raise
+    if np.all(np.equal(X[1], X2_expected)):
+        print("Second regime test 1 pass, design_matrix")
+        return
+    else:
+        print("Second regime test 1 failed, design_matrix")
+        print(X[1])
+        print(X2_expected)
         raise
 
 
@@ -105,4 +115,6 @@ def test_tar_syntetic():
     return None
 
 
-def tar_test_unemploy():
+test_indicator()
+test_threshold_matrix()
+test_design_matrix()
