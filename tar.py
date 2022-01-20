@@ -47,12 +47,12 @@ class star():
     which result in the LSTAR or ESTAR model.
     """
 
-    def __init__(self, lags: list, intercept: list = [true, true],
-                 pi0: float, type: str = 'l') -> None:
+    def __init__(self, lags: list, intercept: list = [True, True],
+                 pi0: float = .3, indi_fn: str = 'l') -> None:
         """Class initizizer.
 
         Args:  
-        lags:       A list of tuples with the lags of each regime ex: [(1, 2, 3), (1, 2)]
+        lags:       A list of lists with the lags of each regime ex: [[1, 2, 3], [1, 2]]
         intercept: A list of bools that indicate whether to fit an intercept in that regime.
         pi0:       Controls the number of candidates for the threshold value.
                    (a value of 1 search in all values of y)
@@ -64,7 +64,7 @@ class star():
         self.fit_intercept = intercept
         self.pi0 = pi0
         self.delta = 0
-        self.type = type
+        self.type = indi_fn
         self.lag_max = max([max(lags[0]), max(lags[1])])
         self.scaler = StandardScaler()
 
@@ -72,12 +72,12 @@ class star():
         """Concatenate the matrix of lagged variables for both regimes."""
         self.threshold_matrix(y)
         X = np.copy(self.lagged_matrix)
-        X = [X[:, self.lags_1], X[:, self.lags_2]]
+        y = X[:, 0]
         intercept = np.ones((X.shape[0], 1))
-        y = X[0][:, 0]
-        for i, with_intercept in enumerate(self.intercept):
+        X = [X[:, self.lag_1], X[:, self.lag_2]]
+        for i, with_intercept in enumerate(self.fit_intercept):
             if with_intercept:
-                X[i] = np.concatenate([intercept, X], axis=1)
+                X[i] = np.concatenate([intercept, X[i]], axis=1)
         return (y, X)
 
     def threshold_matrix(self, y: np.ndarray) -> None:
