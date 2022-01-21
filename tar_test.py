@@ -102,19 +102,35 @@ def syntetic_data(d: int = 2, c: float = .5, T: int = 10000) -> np.ndarray:
 
 
 def test_tar_syntetic():
-    y = syntetic_data()
-    objTar = star(1, 2, .5, type='i')
+    y = syntetic_data(T=1000)
+    objTar = tar.star([[1], [1, 2]])
     objTar.fit(y)
     coeff_expected = [.7, .4, .2, .2, .3]
     c_expected = .5
     d_expected = 2
     coeff_result = objTar.params['params']
+    c_result = objTar.params['c']
+    d_result = objTar.params['d']
     print(f"Expected coefficients are {coeff_expected} and the result was {coeff_result}\n")
-    print(f"Expected threshold is {c_expected} and the result was {coeff_result}\n")
-    print(f"Expected lag is {d_expected} and the result was {coeff_result}\n")
+    print(f"Expected threshold is {c_expected} and the result was {c_result}\n")
+    print(f"Expected lag is {d_expected} and the result was {d_result}\n")
     return None
+
+
+def test_tar_tsay():
+    y = np.genfromtxt("Data/m-unrate.txt", skip_header=True)[:, 3]
+    print(y.shape)
+    y = np.diff(y, 1)
+    print(y.shape)
+    lag_r1 = [2, 3, 4, 12]
+    lag_r2 = [2, 3, 12]
+    objTar = tar.star([lag_r1, lag_r2], [False, False])
+    objTar.fit(y)
+    print(objTar.params)
 
 
 test_indicator()
 test_threshold_matrix()
 test_design_matrix()
+test_tar_syntetic()
+test_tar_tsay()
