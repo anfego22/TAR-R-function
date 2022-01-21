@@ -1,29 +1,39 @@
+#+STARTUP: overview
 * Welcome to the TAR family
   Before there were NN, RNN, CNN, GANS and other things, there were non linear time series models developed in the 80's like the TAR family (which stands for Threshold Autoregresive Models). The TAR models are autoregresive models with two regimes:
-  $$y_{t} = \phi * y_{t-p} * I(x_{t-d} > c) + \phi * y_{t-p} * I(x_{t-d} > c)$$
+  y_{t} = \phi * y_{t-p} * I(x_{t-d} > c) + \phi * y_{t-p} * I(x_{t-d} > c)
 
-In any given t, $y_{t}$ came from a distribution with $\phi_{1}$ or $\phi_{2}$ depending if 
-$x_{t-d} > c$. 
+In any given t, y_{t} came from a distribution with \phi_{1} or \phi_{2} depending if 
+x_{t-d} > c. 
 
-A special case is when $x_{t-d} = y_{t-d}$, in other words when the transition is determined by one of the lags of the dependent variable. This special case is the Self Existing Threshold Autoregresive model (SETAR)
+A special case is when x_{t-d} = y_{t-d}, in other words when the transition is determined by one of the lags of the dependent variable. This special case is the Self Existing Threshold Autoregresive model (SETAR)
 
-** SETAR
-   In thi code we define the SETAR model with an indicator transition function and the method of estimation is by sequential ordinal least squares. 
+* SETAR
+   In thi code we define the SETAR model with an indicator transition function and the method of estimation is by sequential ordinal least squares (SOLS). 
 
-** SOLS
+* SOLS
    SOLS is just computing OLS for all posible values of c and d and find the c, and d that minimize the
    sum of square errors.
 
-** DONE complete sequential_least_square function.
-   CLOSED: [2022-01-13 Thu 21:47] DEADLINE: <2022-01-16 Sun>
-** DONE create test for the threshold_matrix
-   CLOSED: [2022-01-15 Sat 01:41] DEADLINE: <2022-01-16 Sun>
-** DONE create test for the design matrix
-   CLOSED: [2022-01-15 Sat 02:42] DEADLINE: <2022-01-14 Fri>
-** TODO Debug de fit function (learn the debugging tool)
-DEADLINE: <2022-01-15 Sat>
+* Simulated result
+The function syntetic_data in tar.py produce a syntetic series with 10,000 observations, that follows a TAR model with parameters:
++ c = .5
++ d = 2
++ phi_1 = [.7, .4]
++ phi_2 = [.2, .2, .3]   
+With 10,000 simulated observation the model converge to the following result
++ c = 5
++ d = 1
++ phi_1 = [.72, .38]
++ phi_2 = [.17, .15, .33]
+* Results with tsay data.
+Unfortunatly I can't replicate the results of the tsay book, page 180 the example with the U.S monthly civilian unemployment rate.
+model using the first difference of the series
+@book{tsay2005analysis,
+  title={Analysis of financial time series},
+  author={Tsay, Ruey S},
+  volume={543},
+  year={2005},
+  publisher={John wiley \& sons}
+} 
 
-
-
-
-   
