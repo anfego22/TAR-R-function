@@ -101,8 +101,8 @@ def syntetic_data(d: int = 2, c: float = .5, T: int = 10000) -> np.ndarray:
     return np.array(x)
 
 
-def test_tar_syntetic():
-    y = syntetic_data(T=1000)
+def test_tar_syntetic(T):
+    y = syntetic_data(T)
     objTar = tar.star([[1], [1, 2]])
     objTar.fit(y)
     coeff_expected = [.7, .4, .2, .2, .3]
@@ -122,6 +122,7 @@ def test_tar_tsay():
     print(y.shape)
     y = np.diff(y, 1)
     print(y.shape)
+    print(y[0:10])
     lag_r1 = [2, 3, 4, 12]
     lag_r2 = [2, 3, 12]
     objTar = tar.star([lag_r1, lag_r2], [False, False])
@@ -132,5 +133,5 @@ def test_tar_tsay():
 test_indicator()
 test_threshold_matrix()
 test_design_matrix()
-test_tar_syntetic()
+# test_tar_syntetic(10000)
 test_tar_tsay()
