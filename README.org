@@ -21,34 +21,19 @@ The function syntetic_data in tar.py produce a syntetic series with 10,000 obser
 + d = 2
 + phi_1 = [.7, .4]
 + phi_2 = [.2, .2, .3]   
-Unfortunatly the estimation of this data syntetic data produce the results:
-+ c = 1.6 
+With 10,000 simulated observation the model converge to the following result
++ c = 5
 + d = 1
-+ phi_1 = [.66, .4]
-+ phi_2 = [.43, .31, .21]
-
++ phi_1 = [.72, .38]
++ phi_2 = [.17, .15, .33]
 * Results with tsay data.
-In Tsay:
+Unfortunatly I can't replicate the results of the tsay book, page 180 the example with the U.S monthly civilian unemployment rate.
+model using the first difference of the series
 @book{tsay2005analysis,
   title={Analysis of financial time series},
   author={Tsay, Ruey S},
   volume={543},
   year={2005},
   publisher={John wiley \& sons}
-} page 180 there is an example with the U.S monthly civilian unemployment rate, they employ the TAR
-model using the first difference of the series
+} 
 
-* Task completed
-** DONE complete sequential_least_square function.
-   CLOSED: [2022-01-13 Thu 21:47] DEADLINE: <2022-01-16 Sun>
-** DONE create test for the threshold_matrix
-   CLOSED: [2022-01-15 Sat 01:41] DEADLINE: <2022-01-16 Sun>
-** DONE create test for the design matrix
-   CLOSED: [2022-01-15 Sat 02:42] DEADLINE: <2022-01-14 Fri>
-** DONE Debug de fit function (learn the debugging tool)
-CLOSED: [2022-01-18 Tue 22:27] DEADLINE: <2022-01-15 Sat>
-
-
-
-
-   
