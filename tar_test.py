@@ -135,9 +135,9 @@ def test_tar_tsay():
     print(y.shape)
     y = np.diff(y, 1)
     print(y.shape)
-    print(y[0:10])
-    lag_r1 = [2, 3, 4, 12]
-    lag_r2 = [2, 3, 12]
+    print(y[-10:])
+    lag_r1 = [2, 3, 12]
+    lag_r2 = [2, 3, 4, 12]
     objTar = tar.star([lag_r1, lag_r2], [False, False])
     objTar.fit(y)
     print(objTar.params)
