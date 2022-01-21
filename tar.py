@@ -51,7 +51,7 @@ class star():
                  pi0: float = .3, indi_fn: str = 'l') -> None:
         """Class initizizer.
 
-        Args:  
+        Args:
         lags:       A list of lists with the lags of each regime ex: [[1, 2, 3], [1, 2]]
         intercept: A list of bools that indicate whether to fit an intercept in that regime.
         pi0:       Controls the number of candidates for the threshold value.
@@ -96,9 +96,9 @@ class star():
         Tuple containing the parameters and sigma^2
         """
         XX = np.matmul(np.transpose(X), X)
-        #regul = np.zeros(XX.shape)
+        # regul = np.zeros(XX.shape)
         # Add regularization to the diagonal
-        #np.fill_diagonal(regul, self.delta)
+        # np.fill_diagonal(regul, self.delta)
         params = np.linalg.lstsq(X, y, rcond=None)[0]
         residuals = y - np.matmul(X, params)
         sigma = np.matmul(np.transpose(residuals), residuals)
@@ -119,17 +119,17 @@ class star():
         """
         min_sigma = np.inf
         res = {}
-        for lag_d in range(self.lag_max):
+        for lag_d in range(1, self.lag_max+1):
             for c in self.thre_sorted:
-                g = indicator(self.lagged_matrix[:, lag_d + 1], c).reshape(-1, 1)
+                g = indicator(self.lagged_matrix[:, lag_d], c).reshape(-1, 1)
                 X_all = np.concatenate([X[0]*g, X[1]*(1-g)], axis=1)
                 params, metric = self.ordinal_least_square(X_all, y)
                 if metric < min_sigma:
-                    min_sigma = metric
-                    res['params'] = params
-                    res['metric'] = metric
-                    res['d'] = lag_d
-                    res['c'] = c
+                    min_sigma=metric
+                    res['params']=params
+                    res['metric']=metric
+                    res['d']=lag_d
+                    res['c']=c
         return res
 
     def fit(self, X: np.ndarray) -> None:
