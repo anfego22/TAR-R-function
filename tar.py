@@ -28,11 +28,6 @@ def indicator(y: np.ndarray, c: float) -> np.ndarray:
     return (y > c).astype(int)
 
 
-def logistic(gamma, y, c):
-    """Logistic function."""
-    return 1 / (1 + np.exp(-gamma * (y - c)))
-
-
 class star():
     """Calculate the Self Existing Threshold Autoregresive Model.
 
