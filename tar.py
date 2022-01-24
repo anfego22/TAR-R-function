@@ -51,7 +51,11 @@ class star():
                  pi0: float = .3, indi_fn: str = 'l') -> None:
         """Class initizizer.
 
+<<<<<<< HEAD
         Args:
+=======
+        Args:  
+>>>>>>> eef4745 (Fix bug. Design test pass)
         lags:       A list of lists with the lags of each regime ex: [[1, 2, 3], [1, 2]]
         intercept: A list of bools that indicate whether to fit an intercept in that regime.
         pi0:       Controls the number of candidates for the threshold value.
