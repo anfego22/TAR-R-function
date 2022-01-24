@@ -113,6 +113,7 @@ def syntetic_data(d: int= 2, c: float = .5, T: int = 10000) -> np.ndarray:
 
 
 
+
 def test_tar_syntetic(T = 10000):
     y=syntetic_data(T)
     objTar=tar.star([[1], [1, 2]])
@@ -130,9 +131,14 @@ def test_tar_syntetic(T = 10000):
 
 
 def test_tar_tsay():
-    y = np.genfromtxt("Data/m-unrate.txt", skip_header = True)[:, 3]
-    y=np.diff(y, 1)
-    objTar=tar.star([lag_r1, lag_r2], [False, False])
+    y = np.genfromtxt("Data/m-unrate.txt", skip_header=True)[:, 3]
+    print(y.shape)
+    y = np.diff(y, 1)
+    print(y.shape)
+    print(y[0:10])
+    lag_r1 = [2, 3, 4, 12]
+    lag_r2 = [2, 3, 12]
+    objTar = tar.star([lag_r1, lag_r2], [False, False])
     objTar.fit(y)
     print(objTar.params)
 

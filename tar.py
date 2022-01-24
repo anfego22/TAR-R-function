@@ -114,15 +114,15 @@ class star():
         res = {}
         for lag_d in range(1, self.lag_max+1):
             for c in self.thre_sorted:
-                g = indicator(self.lagged_matrix[:, lag_d + 1], c).reshape(-1, 1)
+                g = indicator(self.lagged_matrix[:, lag_d], c).reshape(-1, 1)
                 X_all = np.concatenate([X[0]*g, X[1]*(1-g)], axis=1)
                 params, metric = self.ordinal_least_square(X_all, y)
                 if metric < min_sigma:
-                    min_sigma = metric
-                    res['params'] = params
-                    res['metric'] = metric
-                    res['d'] = lag_d
-                    res['c'] = c
+                    min_sigma=metric
+                    res['params']=params
+                    res['metric']=metric
+                    res['d']=lag_d
+                    res['c']=c
         return res
 
     def fit(self, X: np.ndarray) -> None:
