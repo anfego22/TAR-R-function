@@ -1,7 +1,7 @@
 import torch
 
 
-def design_matrix(y: torch.HalfTensor, lag_list: list, fit_intercept: list = [True, True]) -> tuple:
+def design_matrix(y: torch.HalfTensor, lag_list: list, fit_intercept: list) -> tuple:
     """Concatenate the matrix of lagged variables for both regimes.
 
     Args
