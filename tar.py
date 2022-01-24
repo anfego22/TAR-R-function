@@ -43,6 +43,7 @@ class star():
 
     def __init__(self, lags: list, intercept: list = [True, True],
                  pi0: float = .3) -> None:
+
         """Class initizizer.
 
         Args:
@@ -117,11 +118,11 @@ class star():
                 X_all = np.concatenate([X[0]*g, X[1]*(1-g)], axis=1)
                 params, metric = self.ordinal_least_square(X_all, y)
                 if metric < min_sigma:
-                    min_sigma = metric
-                    res['params'] = params
-                    res['metric'] = metric
-                    res['d'] = lag_d
-                    res['c'] = c
+                    min_sigma=metric
+                    res['params']=params
+                    res['metric']=metric
+                    res['d']=lag_d
+                    res['c']=c
         return res
 
     def fit(self, X: np.ndarray) -> None:
