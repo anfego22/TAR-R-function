@@ -21,17 +21,11 @@
   e_t:   A random normal variable
 """
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 
 
 def indicator(y: np.ndarray, c: float) -> np.ndarray:
     """Indicator function, 1 i y_i > c."""
     return (y > c).astype(int)
-
-
-def logistic(gamma, y, c):
-    """Logistic function."""
-    return 1 / (1 + np.exp(-gamma * (y - c)))
 
 
 class star():
@@ -48,7 +42,8 @@ class star():
     """
 
     def __init__(self, lags: list, intercept: list = [True, True],
-                 pi0: float = .3, indi_fn: str = 'l') -> None:
+                 pi0: float = .3) -> None:
+
         """Class initizizer.
 
 <<<<<<< HEAD
@@ -68,9 +63,7 @@ class star():
         self.fit_intercept = intercept
         self.pi0 = pi0
         self.delta = 0
-        self.type = indi_fn
         self.lag_max = max([max(lags[0]), max(lags[1])])
-        self.scaler = StandardScaler()
 
     def design_matrix(self, y: np.ndarray) -> tuple:
         """Concatenate the matrix of lagged variables for both regimes."""
@@ -145,8 +138,6 @@ class star():
 
         Args:
         X:      Numpy array of shape (N, 1) where N is the number of samples
-        method: A string, one of 'i': indicator function, 'l' logistic function
-                'e' exponential function
         """
         y, X = self.design_matrix(X)
         self.thre_sorted = np.sort(y, kind="mergesort")
