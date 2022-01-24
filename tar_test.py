@@ -53,12 +53,21 @@ def test_design_matrix() -> None:
     X1_expected = np.array([
         [1, 1, 1],
         [2, 3, 4]
+<<<<<<< HEAD
     ]).transpose()
     X2_expected = np.array([
         [1, 1, 1],
         [3, 4, 5],
         [1, 2, 3]
     ]).transpose()
+=======
+    ]).transpose()
+    X2_expected = np.array([
+        [1, 1, 1],
+        [3, 4, 5],
+        [1, 2, 3]
+    ]).transpose()
+>>>>>>> eef4745 (Fix bug. Design test pass)
     y_expect = np.array([4, 5, 6])
     tarObj = tar.star(lags)
     y, X = tarObj.design_matrix(y)
@@ -117,6 +126,7 @@ def test_tar_syntetic(T):
     return None
 
 
+<<<<<<< HEAD
 def test_tar_tsay():
     y = np.genfromtxt("Data/m-unrate.txt", skip_header=True)[:, 3]
     print(y.shape)
@@ -135,3 +145,8 @@ test_threshold_matrix()
 test_design_matrix()
 test_tar_syntetic(10000)
 test_tar_tsay()
+=======
+test_indicator()
+test_threshold_matrix()
+test_design_matrix()
+>>>>>>> eef4745 (Fix bug. Design test pass)
